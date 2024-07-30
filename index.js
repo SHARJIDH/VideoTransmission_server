@@ -43,6 +43,13 @@ io.on("connection", (socket) => {
   socket.on("peer:nego:done", ({ to, ans }) => {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
+
+  socket.on("disconnect", () => {
+    const email = socketIdToEmailMap.get(socket.id);
+    emailToSocketIdMap.delete(email);
+    socketIdToEmailMap.delete(socket.id);
+    console.log("socket disconnected", socket.id);
+  });
 });
 
 const port = process.env.PORT || 8000;
