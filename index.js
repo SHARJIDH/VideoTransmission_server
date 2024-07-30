@@ -1,11 +1,20 @@
 const { Server } = require("socket.io");
-
-const io = new Server(8000, {
-  cors: true,
-});
+const http = require("http");
 
 const emailToSocketIdMap = new Map();
 const socketIdToEmailMap = new Map();
+
+const httpServer = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("WebSocket server is running");
+});
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 io.on("connection", (socket) => {
   console.log("socket connected", socket.id);
@@ -35,3 +44,8 @@ io.on("connection", (socket) => {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
 });
+
+const port = process.env.PORT || 8000;
+httpServer.listen(port, () => console.log(`Server is running on port ${port}`));
+
+module.exports = httpServer;
